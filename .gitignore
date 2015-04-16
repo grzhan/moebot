@@ -1,0 +1,8 @@
+*.pyc
+moescript_*
+*.zip
+archives
+dist
+build
+*.txt
+__pycache__

@@ -31,14 +31,14 @@ def logout():
 @app.route('/celery/test')
 def celery_test():
     result = add.delay(1,2)
-    app.logger.debug(result.ready())
+    app.logger.debug(result.state)
     return '任务发布成功'
 
 
 app.secret_key = 'fd764a8237d7aae60a9135aa0ea6a7d2'
 
 def make_celery(app):
-    celery = Celery('app', broker=app.config['CELERY_BROKER_URL'], 
+    celery = Celery('moebot', broker=app.config['CELERY_BROKER_URL'], 
         backend=app.config['CELERY_RESULT_BACKEND'])
     celery.conf.update(app.config)
     TaskBase = celery.Task

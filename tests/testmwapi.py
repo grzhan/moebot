@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # ============================================
 #  __  __            _           _   
 # |  \/  | ___   ___| |__   ___ | |_ 
@@ -14,17 +14,52 @@
 # 
 
 from unittest import main,TestCase
-from ..mwapi import login as mwlogin, get_edit_token as mwtoken
+from ..mwapi import (login as mwlogin, get_edit_token as mwtoken, get_pid as mwpid,
+	get_content as mwcontent,edit as mwedit)
 
 class TestMediaWikiAPI(TestCase):
 	def setUp(self):
 		self.host = 'http://192.168.10.10/mediawiki/api.php'
 		self.username = 'grzhan'
 		self.password = '123456'
+	
 	def testlogin(self):
 		ret = mwlogin(self.host,self.username,self.password)
-		print ret['json']
+		if not ret['success']:
+			print 
+			print ret['errtitle']
+			print ret['errmsg']
 		self.assert_(ret['success'])
+
+	def testgetpid(self):
+		title = '舰队Collection:比睿'
+		ret = mwpid(self.host,title)
+		if not ret['success']:
+			print 
+			print ret['errtitle']
+			print ret['errmsg']
+		self.assert_(ret['success'])
+
+	def testgetcontent(self):
+		pageid = 7		# Title: 舰队Collection:比睿
+		ret = mwcontent(self.host, pageid)
+		if not ret['success']:
+			print 
+			print ret['errtitle']
+			print ret['errmsg']
+		self.assert_(ret['success'])
+
+	def testedit(self):
+		signin_cookie = mwlogin(self.host,self.username,self.password)['cookie']
+		ret = mwedit(self.host,'test','test',signin_cookie, title='舰队Collection:长门')
+		if not ret['success']:
+			print 
+			print ret['errtitle']
+			print ret['errmsg']
+		self.assert_(ret['success'])
+
+
+
 
 if __name__ == '__main__':
 	main()

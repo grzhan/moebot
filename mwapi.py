@@ -21,6 +21,13 @@ if not DEBUG:
 
 from requests import get,post,ConnectionError,HTTPError,Timeout,TooManyRedirects
 
+class MWAPIException(Exception):
+	"""
+	MWAPIException MWAPI函数中异常
+	"""
+	pass
+
+
 def MediaWikiAPI(func):
 	"""
 	MediaWikiAPI 控制API请求异常的装饰器
@@ -51,6 +58,10 @@ def MediaWikiAPI(func):
 			else:
 				err_title = 'Value Error'
 				err_message = e.message
+		except MWAPIException as e:
+			err_title = 'Mediawiki API 异常'
+			err_message = e.message
+
 		if not DEBUG:
 			app.logger.error(err_message)		
 		return {'success': False, 'errtitle': err_title, 'errmsg': err_message}
@@ -71,15 +82,13 @@ def login(host,username,password):
 	rep = post(host,rdata)
 	cookie = rep.cookies.get_dict()
 	if cookie == {}:
-		return {'success': False, 'errtitle': '初步登陆验证失败',
-		'errmsg':'登陆响应Cookie为空，请检查Mediawiki的用户名密码是否正确'}
+		raise MWAPIException('登陆响应Cookie为空，请检查Mediawiki的用户名密码是否正确')
 	rdata['lgtoken'] = rep.json()['login']['token']
 	# 第二次登陆验证
 	rep = post(host,rdata,cookies=cookie)
 	signin_cookie = rep.cookies.get_dict()
 	if signin_cookie == {}:
-		return {'success': False, 'errtitle': '登陆验证失败',
-		'errmsg':'二步登陆响应Cookie为空，请联系开发者检查有关程序'}	
+		raise MWAPIException('二步登陆响应Cookie为空，请联系开发者检查有关程序')
 	signin_cookie.update(cookie)
 	return {'success': True, 'json': rep.json(), 'cookie': signin_cookie}
 

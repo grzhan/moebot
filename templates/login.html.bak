@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MoeBot | 萌娘百科姬器人平台</title>
+    <link rel="stylesheet" href="../static/css/semantic.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background-image: url('../static/images/connected.png');
+            padding-top: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui three column centered stackable grid">
+       <div class="column">
+        <div class="ui green segment">
+            <h2 class="ui centered dividing header">
+                萌百姬器人
+                <div class="sub header">
+                    刚从小黑屋出来的v.alpha
+                </div>
+            </h2>
+            <form action="/login" method="post" class="ui form">
+               <div class="field">
+                   <div class="ui left icon input">
+                       <i class="user icon"></i>
+                        <input name="username" type="text" placeholder="用户名">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="privacy icon"></i>
+                        <input name="password" type="password" placeholder="密码">
+                    </div>
+                </div>
+                <div class="ui error message"></div>
+            </form>
+            <div class="ui inverted divider"></div>
+            <div id="submit" class="ui green submit button right floated">
+                登录
+            </div>
+            <div style="clear:both;"></div>            
+        </div>
+      </div>
+    </div>
+
+    <script src="../static/js/jquery.min.js"></script>
+    <script src="../static/js/semantic.min.js"></script>
+       
+    <script>
+        $(document).ready(function() {
+            $('.ui.form').form({
+                    username: {
+                        identifier: 'username',
+                        rules: [
+                            {
+                                type : 'empty',
+                                prompt : '请输入你的用户名'
+                            }
+                        ]
+                    },
+                    password : {
+                        identifier: 'password',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入你的密码'
+                            },
+                            {
+                                type: 'length[6]',
+                                prompt: '密码至少6位'
+                            }
+                        ]
+                    }
+            });
+            $('.ui.submit.button').click(function() {
+                $('.ui.form').submit();
+            });
+        });
+    </script>
+</body>
+</html>

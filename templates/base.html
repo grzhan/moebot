@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		{% block header %}			
+		    <meta charset="UTF-8">
+		    <title>MoeBot | 萌娘百科姬器人平台</title>
+		    <link rel="stylesheet" href="{{ url_for('static', filename='css/semantic.min.css') }}">
+		    <meta name="viewport" content="width=device-width, initial-scale=1">
+		    {% block style %}{% endblock %}
+		{% endblock %}
+	</head>
+
+	<body>
+		{% block body %}
+
+
+		{% endblock %}
+		{% block script %}
+	    	<script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
+	    	<script src="{{ url_for('static', filename='js/semantic.min.js')}}"></script>		
+		{% endblock %}
+	</body>
+</html>

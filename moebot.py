@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+# ============================================
+#  __  __            _           _   
+# |  \/  | ___   ___| |__   ___ | |_ 
+# | |\/| |/ _ \ / _ \ '_ \ / _ \| __|
+# | |  | | (_) |  __/ |_) | (_) | |_ 
+# |_|  |_|\___/ \___|_.__/ \___/ \__|
+# 
+# --------------------------------------------
+# @Author: grzhan
+# @Date:   2015-04-28
+# @Email:  i@grr.moe
+# @Description: Moebot是方便Mediawiki编辑者的自动脚本机器人
+
 from flask import Flask, session, redirect, url_for, escape, request,render_template,flash,get_flashed_messages
 from flask.ext.script import Manager
 from celery import Celery

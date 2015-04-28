@@ -21,18 +21,6 @@ if not DEBUG:
 
 from requests import get,post,ConnectionError,HTTPError,Timeout,TooManyRedirects
 
-
-def banner():
-	ascii_text = '''
- __  __            _           _   
-|  \/  | ___   ___| |__   ___ | |_ 
-| |\/| |/ _ \ / _ \ '_ \ / _ \| __|
-| |  | | (_) |  __/ |_) | (_) | |_ 
-|_|  |_|\___/ \___|_.__/ \___/ \__|
-'''
-	return ascii_text
-
-
 def MediaWikiAPI(func):
 	"""
 	MediaWikiAPI 控制API请求异常的装饰器
@@ -85,7 +73,7 @@ def login(host,username,password):
 	if cookie == {}:
 		return {'success': False, 'errtitle': '初步登陆验证失败',
 		'errmsg':'登陆响应Cookie为空，请检查Mediawiki的用户名密码是否正确'}
-	rdata['lgtoken'] = response.json()['login']['token']
+	rdata['lgtoken'] = rep.json()['login']['token']
 	# 第二次登陆验证
 	rep = post(host,rdata,cookies=cookie)
 	signin_cookie = rep.cookies.get_dict()

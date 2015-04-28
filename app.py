@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, session, redirect, url_for, escape, request,render_template,flash,get_flashed_messages
+from flask.ext.script import Manager
+from celery import Celery
 app = Flask(__name__)
 
 @app.route("/")
@@ -10,7 +12,6 @@ def index():
 
 @app.route('/login',methods=['GET','POST'])
 def login():
-    app.logger.debug(get_flashed_messages())
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -27,13 +28,17 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('index'))
 
+@app.route('/celery/test')
+def celery_test():
+    result = add.delay(1,2)
+    app.logger.debug(result.ready())
+    return '任务发布成功'
+
+
 app.secret_key = 'fd764a8237d7aae60a9135aa0ea6a7d2'
 
-
-from celery import Celery
-
 def make_celery(app):
-    celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'], 
+    celery = Celery('app', broker=app.config['CELERY_BROKER_URL'], 
         backend=app.config['CELERY_RESULT_BACKEND'])
     celery.conf.update(app.config)
     TaskBase = celery.Task
@@ -58,4 +63,5 @@ def add(a,b):
 
 if __name__ == '__main__':
     app.debug = True
-    app.run()
+    manager = Manager(app)
+    manager.run()

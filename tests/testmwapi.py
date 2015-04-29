@@ -32,16 +32,20 @@ class TestMediaWikiAPI(TestCase):
 		self.assert_(ret['success'])
 
 	def testgetpid(self):
-		title = '舰队Collection:比睿'
+		# title = '舰队Collection:比睿'
+		title = 'Talk:提问求助区'
 		ret = mwpid(self.host,title)
 		if not ret['success']:
 			print 
 			print ret['errtitle']
 			print ret['errmsg']
+		# else:
+			print ret['pageid']
 		self.assert_(ret['success'])
 
 	def testgetcontent(self):
-		pageid = 7		# Title: 舰队Collection:比睿
+		# pageid = 7		# Title: 舰队Collection:比睿
+		pageid = 9          # Title: Talk:提问求助区
 		ret = mwcontent(self.host, pageid)
 		if not ret['success']:
 			print 
@@ -57,6 +61,8 @@ class TestMediaWikiAPI(TestCase):
 			print ret['errtitle']
 			print ret['errmsg']
 		self.assert_(ret['success'])
+
+
 
 
 

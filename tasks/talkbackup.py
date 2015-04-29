@@ -1,8 +1,24 @@
-from ..moebot import celery,app
-from .. import mwapi
+# -*- coding: utf-8 -*-
+# ============================================
+#  __  __            _           _   
+# |  \/  | ___   ___| |__   ___ | |_ 
+# | |\/| |/ _ \ / _ \ '_ \ / _ \| __|
+# | |  | | (_) |  __/ |_) | (_) | |_ 
+# |_|  |_|\___/ \___|_.__/ \___/ \__|
+# 
+# --------------------------------------------
+# @Author: grzhan
+# @Date:   2015-04-29
+# @Email:  i@grr.moe
+# @Description: Task:Talk Backup 讨论板备份任务
+# 
+
+from moebot.Moebot import celery
+from moebot import mwapi
 import os
 import datetime
 import pytz
+import re
 
 def text_process(content):	
 	# I. 去掉{{模板:提问求助区页顶}}
@@ -48,25 +64,37 @@ def text_process(content):
 	return newcontent
 
 
-
 @celery.task(bind=True)
 def talk_backup(self):
 	"""
 	Task:Talk Backup 讨论板备份
-	针对每月提问/讨论区进行备份，备份的要求如下：
-	...
+	针对每月提问/讨论区进行备份，备份时进行的文本处理参见text_process函数
 	"""
 	username = 'grzhan'
 	password = '123456'
 	reason   = 'Talk Backup 测试'
-	sign_cookies = mwapi.login(host, username, password)
+	host = 'http://192.168.10.10/mediawiki/api.php'
 	title = 'Talk:提问求助区'
 
+	# Get signin session
+	ret = mwapi.login(host, username, password)
+	if ret['success']:
+		signin_cookies = ret['cookie']
+
 	# Get page id
-	pid = mwapi.get_pid(host, title)
+	ret = mwapi.get_pid(host, title)
+	if ret['success']:
+		pid = ret['pageid']
+	else:
+		return 'Failed'
 
 	# Get page content
-	content = get_content(host,pid)
+	ret = mwapi.get_content(host,pid)
+	if ret['success']:
+		content = ret['content']
+		return content
+	else:
+		return 'Failed'
 
 	# Get Processed content
 	ncontent = text_process(content)
@@ -74,12 +102,16 @@ def talk_backup(self):
 	# Get Current Month
 	tz = pytz.timezone('Asia/Shanghai')
 	month = datetime.datetime.now(tz).month
+	
 	# ntitle = 'Talk:提问求助区/存档/2015年%.2d月' % (month)
-	ntitle = 'User:AnnAngela/SandBox'
-
+	ntitle = 'User:Grzhan/SandBox'
 	reason = reason.replace('@title', ntitle)
-	print ncontent
-	rep = edit(host, ncontent, reason, signin_cookies,title=ntitle)
-	if not rep is None:
-		prompt('存档成功！')
+
+	# 备份处理后的文本
+	ret = mwapi.edit(host, ncontent, reason, signin_cookies,title=ntitle)
+	if ret['success']:
+		return 'Success'
+	else:
+		return ret
+
 

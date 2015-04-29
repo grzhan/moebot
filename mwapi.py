@@ -17,7 +17,7 @@
 
 DEBUG = True
 if not DEBUG:
-	from moebot import app
+	from Moebot import app
 
 from requests import get,post,ConnectionError,HTTPError,Timeout,TooManyRedirects
 

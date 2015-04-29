@@ -13,19 +13,25 @@
 # @Description: 针对Task:TalkBackup的单元测试
 # 
 
-from __future__ import absolute_import
-
 from moebot.tasks.talkbackup import talk_backup,text_process
 from unittest import main,TestCase
 
 class TestTaskTalkBackup(TestCase):
 	def setUp(self):
+		self.config = dict()
+		self.config['username'] = 'grzhan'
+		self.config['password'] = '123456'
+		self.config['reason']   = 'Talk Backup 测试'
+		self.config['host'] = 'http://192.168.10.10/mediawiki/api.php'
+		self.config['title'] = 'Talk:提问求助区'
+		self.config['target'] = 'User:Grzhan/SandBox'
+
 		pass
 	def testtask(self):
-		result = talk_backup.delay()
+		result = talk_backup.delay(self.config)
 		ret = result.get()
 		print ret
-		self.assert_(ret == 'Success')
+		self.assert_(ret['success'])
 
 
 	def testtextprocess(self):

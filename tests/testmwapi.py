@@ -62,10 +62,5 @@ class TestMediaWikiAPI(TestCase):
 			print ret['errmsg']
 		self.assert_(ret['success'])
 
-
-
-
-
-
 if __name__ == '__main__':
 	main()

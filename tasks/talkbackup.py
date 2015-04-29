@@ -19,6 +19,7 @@ import os
 import datetime
 import pytz
 import re
+import json
 
 def text_process(content):	
 	# I. 去掉{{模板:提问求助区页顶}}
@@ -65,53 +66,71 @@ def text_process(content):
 
 
 @celery.task(bind=True)
-def talk_backup(self):
+def talk_backup(self,config):
 	"""
 	Task:Talk Backup 讨论板备份
 	针对每月提问/讨论区进行备份，备份时进行的文本处理参见text_process函数
 	"""
-	username = 'grzhan'
-	password = '123456'
-	reason   = 'Talk Backup 测试'
-	host = 'http://192.168.10.10/mediawiki/api.php'
-	title = 'Talk:提问求助区'
+	# username = 'grzhan'
+	# password = '123456'
+	# reason   = 'Talk Backup 测试'
+	# host = 'http://192.168.10.10/mediawiki/api.php'
+	# title = 'Talk:提问求助区'
+	# target = 'User:Grzhan/SandBox'
+	# fd = open('../conf/tasks/talk_backup.json','r')
+	# config = json.load(fd)
+	username = config['username']
+	password = config['password']
+	reason   = config['reason']
+	host	 = config['host']
+	title    = config['title']
+	target   = config['target']
 
 	# Get signin session
+	self.update_state(state='PROGRESS',meta={'current':1, 'total': 5, 
+		'status': '【{user}】正在登陆'.format(user=username)})
 	ret = mwapi.login(host, username, password)
 	if ret['success']:
 		signin_cookies = ret['cookie']
+	else:
+		return {'success': False, 'errmsg': ret['errmsg'], 'errtitle': ret['errtitle']}
 
 	# Get page id
+	self.update_state(state='PROGRESS',meta={'current':2, 'total': 5, 
+		'status': '获取【{title}】页面ID'.format(title=title)})		
 	ret = mwapi.get_pid(host, title)
 	if ret['success']:
 		pid = ret['pageid']
 	else:
-		return 'Failed'
+		return {'success': False, 'errmsg': ret['errmsg'], 'errtitle': ret['errtitle']}
 
 	# Get page content
+	self.update_state(state='PROGRESS',meta={'current':3, 'total': 5, 
+		'status': '页面ID为{pid}，获取【{title}】页面内容'.format(title=title,pid=pid)})		
 	ret = mwapi.get_content(host,pid)
 	if ret['success']:
 		content = ret['content']
-		return content
 	else:
-		return 'Failed'
+		return {'success': False, 'errmsg': ret['errmsg'], 'errtitle': ret['errtitle']}
 
 	# Get Processed content
 	ncontent = text_process(content)
-
+	
 	# Get Current Month
 	tz = pytz.timezone('Asia/Shanghai')
 	month = datetime.datetime.now(tz).month
 	
 	# ntitle = 'Talk:提问求助区/存档/2015年%.2d月' % (month)
-	ntitle = 'User:Grzhan/SandBox'
+	ntitle = target
 	reason = reason.replace('@title', ntitle)
 
 	# 备份处理后的文本
+	self.update_state(state='PROGRESS',meta={'current':4, 'total': 5, 
+		'status': '文本处理完毕，正在备份到【{title}】'.format(title=ntitle)})	
 	ret = mwapi.edit(host, ncontent, reason, signin_cookies,title=ntitle)
 	if ret['success']:
-		return 'Success'
+		return {'success': True, 'status': '备份成功！', 'current':5, 'total': 5}
 	else:
-		return ret
+		return {'success': False, 'errmsg': ret['errmsg'], 'errtitle': ret['errtitle']}
 
 

@@ -44,8 +44,6 @@ def logout():
     return redirect(url_for('index'))
 
 
-
-
 app.secret_key = 'fd764a8237d7aae60a9135aa0ea6a7d2'
 
 def make_celery(app):

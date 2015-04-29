@@ -71,14 +71,6 @@ def talk_backup(self,config):
 	Task:Talk Backup 讨论板备份
 	针对每月提问/讨论区进行备份，备份时进行的文本处理参见text_process函数
 	"""
-	# username = 'grzhan'
-	# password = '123456'
-	# reason   = 'Talk Backup 测试'
-	# host = 'http://192.168.10.10/mediawiki/api.php'
-	# title = 'Talk:提问求助区'
-	# target = 'User:Grzhan/SandBox'
-	# fd = open('../conf/tasks/talk_backup.json','r')
-	# config = json.load(fd)
 	username = config['username']
 	password = config['password']
 	reason   = config['reason']

@@ -17,7 +17,7 @@
 
 DEBUG = True
 if not DEBUG:
-	from moebot import app
+	from Moebot import app
 
 from requests import get,post,ConnectionError,HTTPError,Timeout,TooManyRedirects
 
@@ -159,6 +159,7 @@ def edit(host,content,reason, cookie,pageid=None, title = None):
 			info=rep_json['error']['info']))
 	else:
 		raise MWAPIException('编辑失败，未知错误：{json}'.format(json=rep_json))
+
 
 
 

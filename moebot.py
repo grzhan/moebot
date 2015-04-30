@@ -77,8 +77,15 @@ def task_status():
     tid = g.redis.get('task.talkbackup.id')
     if not tid is None:
         task = talk_backup.AsyncResult(tid)
-        print task
-        return task.state
+        if task.state == 'PROGRESS':
+            return task.info.get('status')
+        elif task.state == 'SUCCESS':
+            if task.info.get('success'):
+                return '任务执行成功！'
+            else:
+                return task.info.get('errmsg')
+        else:
+            return str(task.info)
 
 @app.route('/task/config')
 def task_config():
@@ -87,12 +94,12 @@ def task_config():
 @app.route('/task/config/init')
 def task_init():
     config = dict()
-    config['username'] = 'grzhan'
+    config['username'] = 'grtest'
     config['password'] = '123456'
     config['reason']   = u'Talk Backup 测试'
-    config['host'] = 'http://192.168.10.10/mediawiki/api.php'
+    config['host'] = 'http://zh.moegirl.org/api.php'
     config['title'] = u'Talk:提问求助区'
-    config['target'] = 'User:Grzhan/SandBox'
+    config['target'] = 'User:Grtest/SandBox'
     if g.redis.set('task.talkbackup.conf',json.dumps(config)):
         return '配置成功'
     else:

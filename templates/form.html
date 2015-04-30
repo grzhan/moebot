@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block header %}
+    {{ super() }}
+{% endblock %}
+
+{% block style %}
+<style>
+    body {
+        background-image: url('../static/images/connected.png');
+        padding-top: 120px;
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+<div class="ui three column centered stackable grid">
+	<div class="column">
+		<div class="ui piled segment">
+			<h2 class="ui centered dividing header">
+				任务：讨论版备份
+				<div class="sub header">为了应付Anna的应急措施！</div>
+			</h2>
+			<form action="task/start" class="ui form" method="post">
+                <div class="field">
+                    <label>主机API地址</label>
+                    <input type="text" name="host" value="{{ conf['host']}}">
+                </div>
+
+                <div class="field">
+                    <label>登陆用户名</label>
+                    <input type="text" name="username" value="{{ conf['username']}}">
+                </div>
+                <div class="field">
+                    <label>登陆用密码</label>
+                    <input type="password" name="password" value="{{ conf['password']}}">
+                </div>
+                <div class="field">
+                    <label>编辑批注</label>
+                    <input type="text" name="reason" value="{{ conf['reason']}}">
+                </div>
+                <div class="field">
+                    <label>备份源</label>
+                    <input type="text" name="title" value="{{ conf['title']}}">
+                </div>
+                <div class="field">
+                    <label>备份目标</label>
+                    <input type="text" name="target" value="{{ conf['target']}}">
+                </div>
+        		<div class="ui inverted divider"></div>
+        		<div id="submit" class="ui green submit button right floated">
+            		任务执行
+        		</div>
+				<div style="clear:both;"></div>         
+			</form>
+		</div>
+	</div>
+</div>
+	
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script>
+        $(document).ready(function() {
+            $('.ui.form').form({
+                    username: {
+                        identifier: 'username',
+                        rules: [
+                            {
+                                type : 'empty',
+                                prompt : '请输入你的用户名'
+                            }
+                        ]
+                    },
+                    password : {
+                        identifier: 'password',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入你的密码'
+                            },
+                            {
+                                type: 'length[6]',
+                                prompt: '密码至少6位'
+                            }
+                        ]
+                    },
+                    reason: {
+                        identifier: 'reason',
+                        rules: [
+                            {
+                                type : 'empty',
+                                prompt : '请输入你的编辑批注'
+                            }
+                        ]
+                    },
+                    title: {
+                        identifier: 'title',
+                        rules: [
+                            {
+                                type : 'empty',
+                                prompt : '请输入你的备份源'
+                            }
+                        ]
+                    },
+                    ntitle: {
+                        identifier: 'target',
+                        rules: [
+                            {
+                                type : 'empty',
+                                prompt : '请输入你的备份目标'
+                            }
+                        ]
+                    },
+
+
+            });
+            $('.ui.submit.button').click(function() {
+                console.log('submit!');
+                $('.ui.form').submit();
+            });
+        });
+
+    </script>
+{% endblock %}

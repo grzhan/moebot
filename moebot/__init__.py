@@ -19,6 +19,10 @@ import logging
 import sys
 import time
 
+VERSION = '0.1.0'
+__author__ = 'grzhan'
+__email__ = 'i@grr.moe'
+
 logging.basicConfig(
     filename='moebot.log',
     format='%(levelname)-10s %(asctime)s %(message)s',
@@ -100,14 +104,24 @@ class MwApi(object):
         self.rlimit = limit
         self.log = logging.getLogger('moebot')
         self.ua = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 \
-	(KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36'}
+    (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36'}
         self.timestamp = ""
 
     @MWAPIWrapper
     def post(self, rdata, headers={}):
         headers.update(self.ua)
-        return post(self.host, rdata,
-                    cookies=self.signin_cookies, headers=headers)
+        count = 0
+        while count < 3:
+            try:
+                rep = post(self.host, rdata,
+                           cookies=self.signin_cookies, headers=headers)
+                break
+            except ConnectionError as e:
+                count += 1
+        if count >= 3:
+            raise e
+        else:
+            return rep
 
     @MWAPIWrapper
     def login(self, username, password):
@@ -147,8 +161,10 @@ class MwApi(object):
         return {'success': True, 'token': token}
 
     @MWAPIWrapper
-    def edit(self, content, reason, pageid=None, title=None):
+    def edit(self, content, reason, pageid=None, title=None, secId=0):
         rdata = {'action': 'edit', 'format': 'json'}
+        if secId > 0:
+            rdata['section'] = secId
         if pageid:
             rdata['pageid'] = pageid
         elif title:
@@ -169,14 +185,16 @@ class MwApi(object):
             return {'success': True, 'json': rep_json}
         # TODO 对于编辑结果异常的细化处理
         elif 'error' in rep_json:
-            raise MWAPIException('编辑失败，出错码【{code}】:{info}'.format(code=rep_json['error']['code'],
-                                                                  info=rep_json['error']['info']))
+            raise MWAPIException('编辑失败，出错码【{code}】:{info}'.format(
+                code=rep_json['error']['code'],
+                info=rep_json['error']['info']))
         else:
             raise MWAPIException('编辑失败，未知错误：{json}'.format(json=rep_json))
 
     def files_generator(self):
-        rdata = {'action': 'query', 'generator': 'allpages', 'gapnamespace': '6',
-                 'gaplimit': self.rlimit, 'format': 'json', 'prop': 'revisions', 'rvprop': 'content'}
+        rdata = {'action': 'query', 'generator': 'allpages',
+                 'gapnamespace': '6', 'gaplimit': self.rlimit,
+                 'format': 'json', 'prop': 'revisions', 'rvprop': 'content'}
         while 1:
             rep = self.post(rdata)
             files = rep.json()['query']['pages']
@@ -188,7 +206,8 @@ class MwApi(object):
 
     def images_generator(self):
         rdata = {'action': 'query', 'list': 'allimages', 'aisort': 'timestamp',
-                 'format': 'json', 'aiprop': 'timestamp|url|comment', 'ailimit': self.rlimit}
+                 'format': 'json', 'aiprop': 'timestamp|url|comment',
+                 'ailimit': self.rlimit}
         if self.timestamp:
             rdata['aistart'] = self.timestamp
         while 1:
@@ -202,16 +221,27 @@ class MwApi(object):
             else:
                 break
 
-        # 根据不同的选项迭代内容（如果是all则不输入起始位置，如果有起始位置则从j2起始位置开始迭代）
-        # 返回得到commet，根据commet判断是否应该反查源地址，如果commet有源地址，那么pass
-        # commet没有源地址的图片使用获取内容API查看该图片的内容，如果有源地址，不验证地址有效性，pass
-        # 上述都没有，将图片上传到saucenao.com（相似度必须90%以上），根据结果判断（pixiv最优先）
-        # 需要bot权限，如果是bot加大扫描的力度
+    @MWAPIWrapper
+    def pageid(self, title, convert_titles='', redirect=''):
+        rdata = {'action': 'query', 'format': 'json',
+                 'converttitles': 'zh-cn'}
+        if convert_titles:
+            rdata['converttitles'] = convert_titles
+        if redirect:
+            rdata['redirects'] = 'true'
+        rdata['titles'] = title
+        rep = self.post(rdata).json()
+        if rep and 'query' in rep and 'pages' in rep['query']:
+            return {'success': True, 'contents': rep['query']['pages']}
+        elif 'error' in rep:
+            raise MWAPIException('获取页面ID失败，出错码【{code}】:{info}'.format(
+                code=rep['error']['code'],
+                info=rep['error']['info']))
 
     @MWAPIWrapper
     def contents(self, titles=[], pids=[]):
-        rdata = {'action': 'query', 'format': 'json', 'prop': 'revisions', 'rvprop': 'content'}
-        self.log.info('Title数量：%d', len(titles))
+        rdata = {'action': 'query', 'format': 'json',
+                 'prop': 'revisions', 'rvprop': 'content'}
         if titles:
             rdata['titles'] = '|'.join(titles)
         elif pids:
@@ -222,9 +252,17 @@ class MwApi(object):
         if rep and 'query' in rep and 'pages' in rep['query']:
             return {'success': True, 'contents': rep['query']['pages']}
         elif 'error' in rep:
-            raise MWAPIException('获取内容失败，出错码【{code}】:{info}'.format(code=rep['error']['code'],
-                                                                    info=rep['error']['info']))
+            raise MWAPIException('获取内容失败，出错码【{code}】:{info}'.format(
+                code=rep['error']['code'],
+                info=rep['error']['info']))
         # print rep.json()
+
+    @MWAPIWrapper
+    def content(self, title='', pid=''):
+        if title:
+            return self.contents(titles=[title])
+        elif pid:
+            return self.contents(pids=[pid])
 
     @MWAPIWrapper
     def update_timestamp(self):
@@ -238,3 +276,5 @@ class Utils(object):
         fmt = '{0}-{1}-{2} {3}:{4}:{5}'
         return fmt.format(value[:4], value[4:6], value[6:8],
                           value[8:10], value[10:12], value[12:14])
+
+__all__ = ['MwApi', '__author__', 'VERSION', '__email__']

@@ -108,13 +108,18 @@ class MwApi(object):
         self.timestamp = ""
 
     @MWAPIWrapper
-    def post(self, rdata, headers={}):
+    def post(self, rdata, headers={}, files={}):
         headers.update(self.ua)
         count = 0
         while count < 3:
             try:
-                rep = post(self.host, rdata,
-                           cookies=self.signin_cookies, headers=headers)
+                if files:
+                    return post(self.host, rdata,
+                                cookies=self.signin_cookies,
+                                headers=headers, files=files)
+                else:
+                    return post(self.host, rdata,
+                                cookies=self.signin_cookies, headers=headers)
                 break
             except ConnectionError as e:
                 count += 1
@@ -265,8 +270,26 @@ class MwApi(object):
             return self.contents(pids=[pid])
 
     @MWAPIWrapper
-    def update_timestamp(self):
-        pass
+    def upload(self, filepath, filename=""):
+        if not filename:
+            filename = filepath.split('/')[-1]
+        rdata = {'action': 'upload', 'format': 'json',
+                 'filename': filename}
+        files = {'file': open(filepath, 'rb')}
+        token_result = self.edit_token()
+        if token_result['success']:
+            rdata['token'] = token_result['token']
+        else:
+            raise MWAPIException('编辑token获取失败')
+        rep = self.post(rdata, files=files)
+        result = rep.json()['upload']['result'].encode('utf-8')
+        if result == 'Success':
+            self.log.info('图片【%s】上传成功', filename)
+            return {'success': True}
+        else:
+            self.log.warning('图片上传失败，请检查Mediawiki响应')
+            self.log.warning(rep.content)
+            return {'success': False, 'reason': 'duplicate'}
 
 
 class Utils(object):

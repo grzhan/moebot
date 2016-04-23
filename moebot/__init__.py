@@ -289,7 +289,7 @@ class MwApi(object):
         else:
             self.log.warning('图片上传失败，请检查Mediawiki响应')
             self.log.warning(rep.content)
-            return {'success': False, 'reason': 'duplicate'}
+            return {'success': False}
 
 
 class Utils(object):

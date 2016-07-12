@@ -24,7 +24,7 @@ __author__ = 'grzhan'
 __email__ = 'i@grr.moe'
 
 logging.basicConfig(
-    filename='moebot.log',
+    filename='/tmp/moebot.log',
     format='%(levelname)-10s %(asctime)s %(message)s',
     level=logging.DEBUG
 )
@@ -293,7 +293,6 @@ class MwApi(object):
 
 
 class Utils(object):
-
     @staticmethod
     def time_format(value):
         fmt = '{0}-{1}-{2} {3}:{4}:{5}'

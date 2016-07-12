@@ -1,5 +1,7 @@
 # moebot
 
+A simple mediawiki API wrapper, implemented by python. 
+
 alpha version..
 
 ## Install

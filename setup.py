@@ -7,7 +7,6 @@ setup(
     author_email=__email__,
     author=__author__,
     packages=find_packages(),
-    keywords='mediawiki, api wrapper',
     description='A simple mediawiki API wrapper',
     url='https://github.com/grzhan/moebot',
     download_url='https://github.com/grzhan/moebot/tarball/' + VERSION,

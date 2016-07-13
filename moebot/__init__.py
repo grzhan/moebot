@@ -23,7 +23,7 @@ try:
 except ImportError:
     print('Caution: library "requests" is uninstalled.')
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 __author__ = 'grzhan'
 __email__ = 'i@grr.moe'
 

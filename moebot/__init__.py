@@ -13,12 +13,15 @@
 # @Description: 一个简单的Mediawiki API封装
 from __future__ import unicode_literals
 from __future__ import print_function
-from requests import (post, ConnectionError, HTTPError,
-                      Timeout, TooManyRedirects)
 from functools import wraps
 import logging
 import sys
 import time
+try:
+    from requests import (post, ConnectionError, HTTPError,
+                          Timeout, TooManyRedirects)
+except ImportError:
+    print('Caution: library "requests" is uninstalled.')
 
 VERSION = '0.1.1'
 __author__ = 'grzhan'

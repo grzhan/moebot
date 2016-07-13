@@ -11,7 +11,8 @@
 # @Date:   2015-06-07
 # @Email:  i@grr.moe
 # @Description: 一个简单的Mediawiki API封装
-
+from __future__ import unicode_literals
+from __future__ import print_function
 from requests import (post, ConnectionError, HTTPError,
                       Timeout, TooManyRedirects)
 from functools import wraps
@@ -136,7 +137,7 @@ class MwApi(object):
         # 第一次登陆验证
         rep = self.post(rdata)
         self.signin_cookies = rep.cookies.get_dict()
-        result = rep.json()['login']['result'].encode('utf-8')
+        result = rep.json()['login']['result']
         if result in self.login_exceptions:
             raise MWAPIException(self.login_exceptions[result])
         if not self.signin_cookies:
@@ -145,7 +146,7 @@ class MwApi(object):
 
         # 第二次登陆验证
         rep = self.post(rdata)
-        result = rep.json()['login']['result'].encode('utf-8')
+        result = rep.json()['login']['result']
         if result == 'Success':
             signin_cookies = rep.cookies.get_dict()
             if signin_cookies == {}:
@@ -282,7 +283,7 @@ class MwApi(object):
         else:
             raise MWAPIException('编辑token获取失败')
         rep = self.post(rdata, files=files)
-        result = rep.json()['upload']['result'].encode('utf-8')
+        result = rep.json()['upload']['result']
         if result == 'Success':
             self.log.info('图片【%s】上传成功', filename)
             return {'success': True}

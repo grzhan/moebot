@@ -20,7 +20,7 @@ import logging
 import sys
 import time
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 __author__ = 'grzhan'
 __email__ = 'i@grr.moe'
 
